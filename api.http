@@ -31,6 +31,28 @@ Content-type: application/json
 }
 
 ###
+POST http://localhost:3000/partners/events
+Content-Type: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJwYXJ0bmVyMUB1c2VyLmNvbSIsImlhdCI6MTc0ODUzNjQyMSwiZXhwIjoxNzQ4NTQzNjIxfQ.vNFgmvJ1sqvbNKcAAKlbGzIHSESbFQKgt7dY47EBJYk
+
+{
+    "name": "Evento test 1",
+    "description": "descrição do evento",
+    "date": "2025-01-01T00:00:00",
+    "location": "Rua X, bairro etc"
+}
+
+###
+GET http://localhost:3000/partners/events
+
+###
+GET http://localhost:3000/partners/events/:eventId
+
+{
+    "eventId": 1
+}
+
+###
 POST http://localhost:3000/events
 Content-type: application/json
 

@@ -12,10 +12,35 @@ function createConnection(){
         port: 33060
     })
 }
-
+// Model View Controller - Aquitetura em camadas
+// Middleware
 const app = express();
 
-app.use(express.json());''
+app.use(express.json());
+
+app.use(async(req, res, next) => {
+    const token = req.headers['authorization']?.split(" ")[1]
+    
+    if(!token){
+        res.status(401).json({err: "No Token provided"});
+        return;
+    }
+
+    try{
+        const payload = jwt.verify(token, "123456") as {id: number, email: string}
+        const connection = await createConnection();
+        const [rows] = await connection.execute<mysql.RowDataPacket[]>(
+            "SELECT * FROM users WHERE id = ?", [payload.id]
+        );
+        const user = rows.length ? rows[0]: null;
+        if(!user){
+            res.status(401).json({err: "Failed to authenticate token"});
+            return;
+        }
+    }catch(err){
+        res.status(401).json({err: "Failed to authenticate token"})
+    }
+})
 
 app.get('/', (req, res) => {
     res.json({message: 'Hello World!'});
@@ -91,6 +116,18 @@ app.post('/customers', async (req, res) => {
         await connection.end();
     }
 })
+
+// app.post('/partners/event', (req, res) => {
+//     const {name, description, date, location} = req.body;
+// });
+
+// app.get("/partners/events", (req, res) => {});
+
+// app.get("/partners/events/:eventId", (req, res) => {
+//     const { eventId } = req.params;
+//     console.log(eventId);
+//     res.send();
+// })
 
 app.post('/events', (req, res) => {
     const {name, description, date, location} = req.body;
