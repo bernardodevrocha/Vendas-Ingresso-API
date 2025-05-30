@@ -8,7 +8,7 @@ Content-type: application/json
 }
 
 ###
-POST http://localhost:3000/partners
+POST http://localhost:3000/partners/register
 Content-type: application/json
 
 {
@@ -19,7 +19,7 @@ Content-type: application/json
 }
 
 ###
-POST http://localhost:3000/customers
+POST http://localhost:3000/customers/register
 Content-type: application/json
 
 {
@@ -33,7 +33,7 @@ Content-type: application/json
 ###
 POST http://localhost:3000/partners/events
 Content-Type: application/json
-# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJwYXJ0bmVyMUB1c2VyLmNvbSIsImlhdCI6MTc0ODUzNjQyMSwiZXhwIjoxNzQ4NTQzNjIxfQ.vNFgmvJ1sqvbNKcAAKlbGzIHSESbFQKgt7dY47EBJYk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJwYXJ0bmVyMUB1c2VyLmNvbSIsImlhdCI6MTc0ODYxNDA5NywiZXhwIjoxNzQ4NjIxMjk3fQ.ILqePnXrY4Xy-WK0sEJgn56AiPHvunMrS1P9e8_p66g
 
 {
     "name": "Evento test 1",

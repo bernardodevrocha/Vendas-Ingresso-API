@@ -18,7 +18,23 @@ const app = express();
 
 app.use(express.json());
 
+const unprotectedRoutes = [
+    {method: "POST", path: "/auth/login"},
+    {method: "POST", path: "/customers/register"},
+    {method: "POST", path: "/partners/register"},
+    {method: "GET", path: "/events"}
+];
+
 app.use(async(req, res, next) => {
+    const isUnprotectedRoute = unprotectedRoutes.some( 
+        route => route.method == req.method && req.path.startsWith(route.path)
+    );
+
+    if(isUnprotectedRoute){
+        return next();
+    }
+
+
     const token = req.headers['authorization']?.split(" ")[1]
     
     if(!token){
@@ -37,6 +53,8 @@ app.use(async(req, res, next) => {
             res.status(401).json({err: "Failed to authenticate token"});
             return;
         }
+        req.user = user as {id: number; email: string};
+        next();
     }catch(err){
         res.status(401).json({err: "Failed to authenticate token"})
     }
@@ -69,7 +87,7 @@ app.post('/auth/login', async (req, res) => {
     res.send();
 })
 
-app.post('/partners', async (req, res) => {
+app.post('/partners/register', async (req, res) => {
     const {name, email, password, company_name} = req.body;
 
     const connection = await createConnection();
@@ -93,7 +111,7 @@ app.post('/partners', async (req, res) => {
     }
 })
 
-app.post('/customers', async (req, res) => {
+app.post('/customers/register', async (req, res) => {
     const {name, email, password, adress, phone} = req.body;
 
     const connection = await createConnection();
@@ -117,17 +135,34 @@ app.post('/customers', async (req, res) => {
     }
 })
 
-// app.post('/partners/event', (req, res) => {
-//     const {name, description, date, location} = req.body;
-// });
+app.post('/partners/event', async (req, res) => {
+    const {name, description, date, location} = req.body;
+    const userId = req.user!.id;
+    const connection = await createConnection();
+    const [rows] = await connection.execute<mysql.RowDataPacket[]>(
+        "SELECT * FROM partners WHERE user_id = ?", [userId]
+    );
+    const partner = rows.length ? rows[0]: null;
 
-// app.get("/partners/events", (req, res) => {});
+    if(!partner){
+        res.status(403).json({err: "Not authorized!"});
+    }
 
-// app.get("/partners/events/:eventId", (req, res) => {
-//     const { eventId } = req.params;
-//     console.log(eventId);
-//     res.send();
-// })
+    const eventDate = new Date(date);
+    const createdAt = new Date();
+    const [eventResult] = await connection.execute<mysql.ResultSetHeader>('INSERT INTO events (name, description, date, created_at, location, partner_id) VALUES (?,?,?,?,?,?)', [
+            name, description, new Date(date), location, new Date(), partner.id
+        ]);
+        res.status(201).json({id: eventResult.insertId, name, description, eventDate, location, createdAt, partner_id});
+});
+
+app.get("/partners/events", (req, res) => {});
+
+app.get("/partners/events/:eventId", (req, res) => {
+    const { eventId } = req.params;
+    console.log(eventId);
+    res.send();
+})
 
 app.post('/events', (req, res) => {
     const {name, description, date, location} = req.body;
